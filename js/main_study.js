@@ -18,8 +18,11 @@
                 messageD: document.querySelector('#scroll-section-0 .main-message.d')
             },
             values: {
-                messageA_opacity: [0, 1, { start: 0.1, end: 0.2 }],
-                messageB_opacity: [0, 1, { start: 0.3, end: 0.4 }],
+                messageA_opacity_in: [0, 1, { start: 0.1, end: 0.2 }],
+                //messageB_opacity_in: [0, 1, { start: 0.3, end: 0.4 }],
+                messageA_translateY_in: [20, 0, { start: 0.1, end: 0.2 }],
+                messageA_opacity_out: [1, 0, { start: 0.25, end: 0.3 }],
+                messageA_translateY_out: [0, -20, { start: 0.25, end: 0.3 }],
             }
         },
         {
@@ -54,7 +57,11 @@
     function setLayout() {
         // 각 스크롤 섹션의 높이 세팅
         for (let i = 0; i < sceneInfo.length; i++) {
-            sceneInfo[i].scrollHeight = sceneInfo[i].heightNum * window.innerHeight
+            if (sceneInfo[i].type === 'sticky') {
+                sceneInfo[i].scrollHeight = sceneInfo[i].heightNum * window.innerHeight
+            } else if (sceneInfo[i].type === 'normal') {
+                sceneInfo[i].scrollHeight = sceneInfo[i].objs.container.offsetHeight
+            }
             sceneInfo[i].objs.container.style.height = `${sceneInfo[i].scrollHeight}px`
         }
 
@@ -101,13 +108,20 @@
         const objs = sceneInfo[currentScene].objs
         const values = sceneInfo[currentScene].values
         const currentYOffset = yOffset - prevScrollHeight
+        const scrollHeight = sceneInfo[currentScene].scrollHeight
+        const scrollRatio = currentYOffset / scrollHeight
 
         switch (currentScene) {
             case 0:
                 // console.log('0 play')
-                let messageA_opacity_in = calcValues(values.messageA_opacity, currentYOffset)
-                console.log(messageA_opacity_in, objs.messageA)
-                objs.messageA.style.opacity = messageA_opacity_in
+                if ( scrollRatio <= 0.22) {
+                    objs.messageA.style.opacity = calcValues(values.messageA_opacity_in, currentYOffset)
+                    objs.messageA.style.transform = `translateY(${calcValues(values.messageA_translateY_in, currentYOffset)}%)`
+                } else {
+                    objs.messageA.style.opacity = calcValues(values.messageA_opacity_out, currentYOffset)
+                    objs.messageA.style.transform = `translateY(${calcValues(values.messageA_translateY_out, currentYOffset)}%)`
+                }
+                
                 break
             case 1:
                 // console.log('1 play')
