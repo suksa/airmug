@@ -184,15 +184,9 @@
 				}
                 break
             case 1:
-                if (scrollRatio <= 0.5) {
-					// in
-					objs.canvas.style.opacity = calcValues(values.canvas_opacity_in, currentYOffset);
-				} else {
-					// out
-					objs.canvas.style.opacity = calcValues(values.canvas_opacity_out, currentYOffset);
-				}
-
-				if (scrollRatio <= 0.32) {
+                break
+            case 2:
+                if (scrollRatio <= 0.32) {
 					// in
 					objs.messageA.style.opacity = calcValues(values.messageA_opacity_in, currentYOffset);
 					objs.messageA.style.transform = `translate3d(0, ${calcValues(values.messageA_translateY_in, currentYOffset)}%, 0)`;
@@ -224,11 +218,7 @@
 					objs.messageC.style.transform = `translate3d(0, ${calcValues(values.messageC_translateY_out, currentYOffset)}%, 0)`;
 					objs.messageC.style.opacity = calcValues(values.messageC_opacity_out, currentYOffset);
 					objs.pinC.style.transform = `scaleY(${calcValues(values.pinC_scaleY, currentYOffset)})`;
-                }
-                
-                break
-            case 2:
-                // console.log('2 play')
+				}
                 break
             case 3:
                 // console.log('3 play')

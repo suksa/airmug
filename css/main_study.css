@@ -113,7 +113,7 @@ a {
     top: 10%;
     left: 40%
 }
-#scroll-section-2 .b {
+#scroll-section-2 .c {
     top: 15%;
     left: 45%
 }
@@ -178,12 +178,12 @@ a {
         width: 20%;
     }
     #scroll-section-2 .b {
-        top: 20%;
-        left: 53%
-    }
-    #scroll-section-2 .b {
-        left: 55%
-    }
+		top: 20%;
+		left: 53%;
+	}
+	#scroll-section-2 .c {
+		left: 55%;
+	}
     .mid-message {
         font-size: 4vw;
     }
