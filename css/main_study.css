@@ -60,9 +60,11 @@ a {
 }
 .scroll-section {
     padding-top: 50vh;
-    border: 1px solid red;
 }
 #scroll-section-0 h1 {
+    position: relative;
+    top: -10vh;
+    z-index: 5;
     font-size: 4rem;
     text-align: center;
 }
@@ -105,6 +107,7 @@ a {
 .desc-message {
     width: 50%;
     font-weight: 700;
+    opacity: 0;
 }
 .pin {
     width: 1px;
@@ -159,7 +162,13 @@ a {
 
 .sticky-elem-canvas {
     top: 0;
-    background: #eee
+    height: 100%;
+}
+
+.sticky-elem-canvas canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
 }
 
 @media (min-width: 1024px) {
