@@ -318,13 +318,13 @@
                 
                 // 좌우 흰색 박스 그리기
 				objs.context.fillRect(
-					parseInt(calcValues(values.rect1X, currentYOffset)),
+					values.rect1X[0],
 					0,
 					parseInt(whiteRectWidth),
 					objs.canvas.height
 				);
 				objs.context.fillRect(
-					parseInt(calcValues(values.rect2X, currentYOffset)),
+					values.rect2X[0],
 					0,
 					parseInt(whiteRectWidth),
 					objs.canvas.height
