@@ -333,6 +333,7 @@
                 break
             case 3:
                 // console.log('3 play')
+                let step = 0
                 // 가로세로 꽉차게하기위해 세팅
                 const widthRatio = window.innerWidth / objs.canvas.width
                 const heightRatio = window.innerHeight / objs.canvas.height
@@ -394,7 +395,21 @@
 					0,
 					parseInt(whiteRectWidth),
 					objs.canvas.height
-				);
+                );
+                
+                if (scrollRatio < values.rect1X[2].end) {
+                    step = 1
+                    console.log('캔버스닿기전')
+                    objs.canvas.classList.remove('sticky')
+                } else {
+                    step = 2
+                    console.log('캔버스닿은후')
+                    objs.canvas.classList.add('sticky')
+                    objs.canvas.style.top = `${-(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`
+                    // if () {
+                    //     step = 3
+                    // }
+                }
 
                 break
         }
