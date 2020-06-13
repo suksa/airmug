@@ -36,6 +36,12 @@ a {
     border-bottom: 1px solid #ddd;
     z-index: 11;
 }
+.local-nav-sticky .local-nav {
+    position: fixed;
+    top: 0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: saturate(180%) blur(15px);
+}
 .global-nav-links,
 .local-nav-links {
     display: flex;
@@ -135,7 +141,7 @@ a {
 }
 .canvas-caption {
     max-width: 1000px;
-    margin: 0 auto;
+    margin: -8em auto 0;
     padding: 0 1rem;
     font-size: 1.2rem;
     color: #888;
@@ -192,6 +198,7 @@ a {
     }
     .description {
         font-size: 2rem;
+        padding: 0
     }
     .description strong {
         font-size: 6rem;
@@ -213,9 +220,12 @@ a {
 		left: 55%;
 	}
     .mid-message {
+        padding: 0;
+        width: 1000px;
         font-size: 4vw;
     }
     .canvas-caption {
+        padding: 0;
         font-size: 2rem;
     }
 }

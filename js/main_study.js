@@ -3,6 +3,10 @@
     let prevScrollHeight = 0 // 현재스크롤 보다 이전에 위치한 스크롤높이의 합
     let currentScene = 0 // 현재 활성화된 씬
     let enterNewScene = false // 새로운 scene이 시작되는 순간 true
+    let acc = 0.1;
+    let delayedYOffset = 0;
+    let rafId;
+    let rafState;
 
     const sceneInfo = [
         {
@@ -107,6 +111,10 @@
             values: {
                 rect1X: [ 0, 0, { start: 0, end: 0} ],
                 rect2X: [ 0, 0, { start: 0, end: 0} ],
+                blendHeight: [ 0, 0, { start: 0, end: 0} ],
+                canvas_scale: [ 0, 0, { start: 0, end: 0} ],
+                canvasCaption_opaicy: [ 0,1, { start: 0, end: 0} ],
+                canvasCaption_translateY: [ 20, 0, { start: 0, end: 0} ],
                 rectStartY: 0,
             }
         },
@@ -134,7 +142,14 @@
             sceneInfo[3].objs.images.push(imgElem3)
         }
     }
-    setCanvasImages()
+
+    function checkMenu() {
+        if (yOffset > 44) {
+            document.body.classList.add('local-nav-sticky')
+        } else {
+            document.body.classList.remove('local-nav-sticky')
+        }
+    }
 
     function setLayout() {
         // 각 스크롤 섹션의 높이 세팅
@@ -199,8 +214,8 @@
 
         switch (currentScene) {
             case 0:
-                let sequence = Math.round(calcValues(values.imageSequence, currentYOffset))
-                objs.context.drawImage(objs.videoImages[sequence], 0, 0)
+                // let sequence = Math.round(calcValues(values.imageSequence, currentYOffset))
+                // objs.context.drawImage(objs.videoImages[sequence], 0, 0)
                 objs.canvas.style.opacity = calcValues(values.canvas_opacity, currentYOffset)
 
                 if ( scrollRatio <= 0.22) {
@@ -244,8 +259,8 @@
             case 1:
                 break
             case 2:
-                let sequence2 = Math.round(calcValues(values.imageSequence, currentYOffset))
-                objs.context.drawImage(objs.videoImages[sequence2], 0, 0)
+                // let sequence2 = Math.round(calcValues(values.imageSequence, currentYOffset))
+                // objs.context.drawImage(objs.videoImages[sequence2], 0, 0)
 
                 if (scrollRatio <= 0.5) {
                     // in
@@ -399,16 +414,47 @@
                 
                 if (scrollRatio < values.rect1X[2].end) {
                     step = 1
-                    console.log('캔버스닿기전')
                     objs.canvas.classList.remove('sticky')
                 } else {
                     step = 2
-                    console.log('캔버스닿은후')
+                    // 이미지 블랜드
+                    // imageBlendY: 0, 0, { start: 0, end: 0}
+                    values.blendHeight[0] = 0
+                    values.blendHeight[1] = objs.canvas.height
+                    values.blendHeight[2].start = values.rect1X[2].end
+                    values.blendHeight[2].end = values.blendHeight[2].start + 0.2
+                    const blendHeight = calcValues(values.blendHeight, currentYOffset)
+
+                    objs.context.drawImage(objs.images[1],
+                        0, objs.canvas.height - blendHeight, objs.canvas.width, blendHeight,
+                        0, objs.canvas.height - blendHeight, objs.canvas.width, blendHeight,
+                    )
+
                     objs.canvas.classList.add('sticky')
                     objs.canvas.style.top = `${-(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`
-                    // if () {
-                    //     step = 3
-                    // }
+
+                    if (scrollRatio > values.blendHeight[2].end) {
+                        values.canvas_scale[0] = canvasScaleRatio
+                        values.canvas_scale[1] = document.body.offsetWidth / (1.5 * objs.canvas.width)
+                        values.canvas_scale[2].start = values.blendHeight[2].end
+                        values.canvas_scale[2].end = values.canvas_scale[2].start + 0.2
+
+                        objs.canvas.style.transform = `scale(${calcValues(values.canvas_scale, currentYOffset)})`
+                        objs.canvas.style.marginTop = 0
+                    }
+
+                    if (scrollRatio > values.canvas_scale[2].end
+                        && values.canvas_scale[2].end > 0) {
+                        objs.canvas.classList.remove('sticky')
+                        objs.canvas.style.marginTop = `${scrollHeight * 0.4}px`
+
+                        values.canvasCaption_opaicy[2].start = values.canvas_scale[2].end
+                        values.canvasCaption_opaicy[2].end = values.canvasCaption_opaicy[2].start + 0.1
+                        values.canvasCaption_translateY[2].start = values.canvasCaption_opaicy[2].start
+                        values.canvasCaption_translateY[2].end = values.canvasCaption_opaicy[2].end
+                        objs.canvasCaption.style.opacity = calcValues(values.canvasCaption_opaicy, currentYOffset)
+                        objs.canvasCaption.style.transform = `translate3d(0, ${calcValues(values.canvasCaption_translateY, currentYOffset)}%, 0)`
+                    }
                 }
 
                 break
@@ -422,13 +468,13 @@
             prevScrollHeight += sceneInfo[i].scrollHeight
         }
 
-        if (yOffset > prevScrollHeight + sceneInfo[currentScene].scrollHeight) {
+        if (delayedYOffset > prevScrollHeight + sceneInfo[currentScene].scrollHeight) {
             enterNewScene = true
             currentScene++
             document.body.setAttribute('id', `show-scene-${currentScene}`)
         }
 
-        if (yOffset < prevScrollHeight) {
+        if (delayedYOffset < prevScrollHeight) {
             enterNewScene = true
             if (currentScene === 0) return // 모바일에서 바운스효과(터치위로했을때) 마이너스방지
             currentScene--
@@ -439,14 +485,51 @@
         playAnimation()
     }
 
+    function loop() {
+        delayedYOffset = delayedYOffset + (yOffset - delayedYOffset) * acc
+
+        if (!enterNewScene) {
+            if (currentScene === 0 || currentScene === 2) {
+                const currentYOffset = delayedYOffset - prevScrollHeight
+                const objs = sceneInfo[currentScene].objs
+                const values = sceneInfo[currentScene].values
+                let sequence = Math.round(calcValues(values.imageSequence, currentYOffset))
+                if (objs.videoImages[sequence]) {
+                    objs.context.drawImage(objs.videoImages[sequence], 0, 0)
+                }
+            }
+        }
+
+        rafId = requestAnimationFrame(loop);
+
+        if (Math.abs(yOffset - delayedYOffset) < 1) {
+            cancelAnimationFrame(rafId);
+            rafState = false
+        }
+    }
+
     window.addEventListener('scroll', () => {
         yOffset = window.pageYOffset
         scrollLoop()
+        checkMenu()
+
+        if (!rafState) {
+            rafId = requestAnimationFrame(loop);
+            rafState = true;
+        }
     })
     // window.addEventListener('DOMContentLoaded', setLayout) ready
     window.addEventListener('load', () => {
         setLayout()
         sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0)
     })
-    window.addEventListener('resize', setLayout)
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 900) {
+            setLayout()
+        }
+        sceneInfo[3].values.rectStartY = 0
+    })
+    window.addEventListener('orientationchange', setLayout) // 모바일화면 가로세로바꿀때
+
+    setCanvasImages()
 })()
