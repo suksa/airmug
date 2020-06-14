@@ -508,28 +508,54 @@
         }
     }
 
-    window.addEventListener('scroll', () => {
-        yOffset = window.pageYOffset
-        scrollLoop()
-        checkMenu()
-
-        if (!rafState) {
-            rafId = requestAnimationFrame(loop);
-            rafState = true;
-        }
-    })
+    
     // window.addEventListener('DOMContentLoaded', setLayout) ready
     window.addEventListener('load', () => {
+        document.body.classList.remove('before-load')
         setLayout()
         sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0)
-    })
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 900) {
-            setLayout()
+
+        let tempYOffset = yOffset
+        let tempScrollConunt = 0
+        if (yOffset > 0) {
+            let siId = setInterval(() => {
+                window.scrollTo(0, tempYOffset)
+                tempYOffset += 1
+    
+                if (tempScrollConunt > 20) {
+                    clearInterval(siId)
+                }
+                tempScrollConunt++
+            }, 10)
         }
-        sceneInfo[3].values.rectStartY = 0
+        
+
+        window.addEventListener('scroll', () => {
+            yOffset = window.pageYOffset
+            scrollLoop()
+            checkMenu()
+    
+            if (!rafState) {
+                rafId = requestAnimationFrame(loop);
+                rafState = true;
+            }
+        })
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) {
+                setLayout()
+                sceneInfo[3].values.rectStartY = 0
+            }
+        })
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(setLayout, 300)
+        }) // 모바일화면 가로세로바꿀때
+
+        document.querySelector('.loading').addEventListener('transitionend', e => {
+            document.body.removeChild(e.currentTarget)
+        })
     })
-    window.addEventListener('orientationchange', setLayout) // 모바일화면 가로세로바꿀때
 
     setCanvasImages()
 })()
